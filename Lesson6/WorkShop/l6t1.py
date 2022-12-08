@@ -1,6 +1,29 @@
 # Напишите программу вычисления арифметического выражения заданного строкой.
 # Используйте операции +,-,/,*. приоритет операций стандартный.
 
+def find_hooks(data):
+    try:
+        last_hook = data.index(')')
+    except ValueError:
+        last_hook = '-1'
+    if last_hook != '-1':
+        try:
+            first_hook = list(reversed(data))
+            first_hook = len(first_hook) - 1 - first_hook.index('(')
+        except ValueError:
+            first_hook = 0
+        print(data)
+        print(last_hook, first_hook)
+        print(data[first_hook + 1:last_hook])
+        data[first_hook] = priority(data[first_hook + 1:last_hook], '/', '*')
+        data[first_hook] = priority(data[first_hook], '-', '+')
+        data[first_hook] = data[first_hook][0]
+        for i in range(last_hook, first_hook, -1):
+            data.pop(i)
+        return data
+    else:
+        return data
+
 
 def priority(data, arg1, arg2):
     for i in range(len(data)):
@@ -27,18 +50,22 @@ def priority(data, arg1, arg2):
     return data
 
 
-def op(oper: str, arg1: str, arg2: str):
-    if oper == '*':
+def op(operation: str, arg1: str, arg2: str):
+    if operation == '*':
         return int(arg1) * int(arg2)
-    elif oper == '/':
+    elif operation == '/':
         return int(arg1) / int(arg2)
-    elif oper == '+':
+    elif operation == '+':
         return int(arg1) + int(arg2)
-    elif oper == '-':
+    elif operation == '-':
         return int(arg1) - int(arg2)
 
 
 lst = input().split()
+iterations = lst.count(')')
+for i in range(iterations):
+    lst = find_hooks(lst)
+    print(lst)
 lst = priority(lst, '/', '*')
 print(lst)
 lst = priority(lst, '-', '+')
