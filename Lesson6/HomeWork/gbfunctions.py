@@ -37,7 +37,7 @@ def random_list(listlen: int) -> list:
 
     datalist = list()
     for i in range(listlen):
-        datalist.append(randint(-10, 10))
+        datalist.append(randint(1, 100))
     return datalist
 
 
