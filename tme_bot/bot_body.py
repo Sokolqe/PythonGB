@@ -1,7 +1,6 @@
 from telegram.ext import Updater, CommandHandler, CallbackContext, \
-    MessageHandler, CallbackQueryHandler, ConversationHandler
+    MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from config import TOKEN
 import logging
 
 
@@ -23,7 +22,7 @@ logger = logging.getLogger(__name__)
 # Этапы/состояния разговора
 FIRST, SECOND = range(2)
 # Данные обратного вызова
-ONE, TWO, THREE, FOUR = range(4)
+ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE = range(9)
 
 
 def start(update, _):
@@ -39,12 +38,21 @@ def start(update, _):
         [
             InlineKeyboardButton("1", callback_data=str(ONE)),
             InlineKeyboardButton("2", callback_data=str(TWO)),
+            InlineKeyboardButton("3", callback_data=str(THREE)),
+        ], [
+            InlineKeyboardButton("4", callback_data=str(FOUR)),
+            InlineKeyboardButton("5", callback_data=str(FIVE)),
+            InlineKeyboardButton("6", callback_data=str(SIX)),
+        ], [
+            InlineKeyboardButton("7", callback_data=str(SEVEN)),
+            InlineKeyboardButton("8", callback_data=str(EIGHT)),
+            InlineKeyboardButton("9", callback_data=str(NINE)),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     # Отправляем сообщение с текстом и добавленной клавиатурой `reply_markup`
     update.message.reply_text(
-        text="Запустите обработчик, выберите маршрут", reply_markup=reply_markup
+        text="Выберите клетку", reply_markup=reply_markup
     )
     # Сообщаем `ConversationHandler`, что сейчас состояние `FIRST`
     return FIRST
@@ -62,13 +70,22 @@ def start_over(update, _):
         [
             InlineKeyboardButton("1", callback_data=str(ONE)),
             InlineKeyboardButton("2", callback_data=str(TWO)),
+            InlineKeyboardButton("3", callback_data=str(THREE)),
+        ], [
+            InlineKeyboardButton("4", callback_data=str(FOUR)),
+            InlineKeyboardButton("5", callback_data=str(FIVE)),
+            InlineKeyboardButton("6", callback_data=str(SIX)),
+        ], [
+            InlineKeyboardButton("7", callback_data=str(SEVEN)),
+            InlineKeyboardButton("8", callback_data=str(EIGHT)),
+            InlineKeyboardButton("9", callback_data=str(NINE)),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
    # Отредактируем сообщение, вызвавшее обратный вызов.
    # Это создает ощущение интерактивного меню.
     query.edit_message_text(
-        text="Выберите маршрут", reply_markup=reply_markup
+        text="Выберите клетку", reply_markup=reply_markup
     )
     # Сообщаем `ConversationHandler`, что сейчас находимся в состоянии `FIRST`
     return FIRST
@@ -77,16 +94,26 @@ def start_over(update, _):
 def one(update, _):
     """Показ нового выбора кнопок"""
     query = update.callback_query
+    choice_index = query.data
     query.answer()
     keyboard = [
         [
+            InlineKeyboardButton("X", callback_data=str(None)),
+            InlineKeyboardButton("2", callback_data=str(TWO)),
             InlineKeyboardButton("3", callback_data=str(THREE)),
+        ], [
             InlineKeyboardButton("4", callback_data=str(FOUR)),
+            InlineKeyboardButton("5", callback_data=str(FIVE)),
+            InlineKeyboardButton("6", callback_data=str(SIX)),
+        ], [
+            InlineKeyboardButton("7", callback_data=str(SEVEN)),
+            InlineKeyboardButton("8", callback_data=str(EIGHT)),
+            InlineKeyboardButton("9", callback_data=str(NINE)),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(
-        text="Вызов `CallbackQueryHandler`, выберите маршрут", reply_markup=reply_markup
+        text="Выберите клетку", reply_markup=reply_markup
     )
     return FIRST
 
@@ -94,11 +121,21 @@ def one(update, _):
 def two(update, _):
     """Показ нового выбора кнопок"""
     query = update.callback_query
+    print(query.data)
     query.answer()
     keyboard = [
         [
             InlineKeyboardButton("1", callback_data=str(ONE)),
+            InlineKeyboardButton("X", callback_data=str(TWO)),
             InlineKeyboardButton("3", callback_data=str(THREE)),
+        ], [
+            InlineKeyboardButton("4", callback_data=str(FOUR)),
+            InlineKeyboardButton("5", callback_data=str(FIVE)),
+            InlineKeyboardButton("6", callback_data=str(SIX)),
+        ], [
+            InlineKeyboardButton("7", callback_data=str(SEVEN)),
+            InlineKeyboardButton("8", callback_data=str(EIGHT)),
+            InlineKeyboardButton("9", callback_data=str(NINE)),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -152,14 +189,15 @@ def end(update, _):
     return ConversationHandler.END
 
 
+updater = Updater('5841761129:AAGWzrUYTccSd75_v837_qqiblVAsTQKm4w')
+dispatcher = updater.dispatcher
 
-
-    # Настройка обработчика разговоров с состояниями `FIRST` и `SECOND`
-    # Используем параметр `pattern` для передачи `CallbackQueries` с
-    # определенным шаблоном данных соответствующим обработчикам
-    # ^ - означает "начало строки"
-    # $ - означает "конец строки"
-    # Таким образом, паттерн `^ABC$` будет ловить только 'ABC'
+# Настройка обработчика разговоров с состояниями `FIRST` и `SECOND`
+# Используем параметр `pattern` для передачи `CallbackQueries` с
+# определенным шаблоном данных соответствующим обработчикам
+# ^ - означает "начало строки"
+# $ - означает "конец строки"
+# Таким образом, паттерн `^ABC$` будет ловить только 'ABC'
 conv_handler = ConversationHandler(
     entry_points=[CommandHandler('start', start)],
     states={ # словарь состояний разговора, возвращаемых callback функциями
@@ -168,6 +206,11 @@ conv_handler = ConversationHandler(
             CallbackQueryHandler(two, pattern='^' + str(TWO) + '$'),
             CallbackQueryHandler(three, pattern='^' + str(THREE) + '$'),
             CallbackQueryHandler(four, pattern='^' + str(FOUR) + '$'),
+            CallbackQueryHandler(one, pattern='^' + str(FIVE) + '$'),
+            CallbackQueryHandler(two, pattern='^' + str(SIX) + '$'),
+            CallbackQueryHandler(three, pattern='^' + str(SEVEN) + '$'),
+            CallbackQueryHandler(four, pattern='^' + str(EIGHT) + '$'),
+            CallbackQueryHandler(four, pattern='^' + str(NINE) + '$'),
         ],
         SECOND: [
             CallbackQueryHandler(start_over, pattern='^' + str(ONE) + '$'),
@@ -176,17 +219,9 @@ conv_handler = ConversationHandler(
     },
     fallbacks=[CommandHandler('start', start)],
     )
-
-
-updater = Updater(TOKEN)
-dispatcher = updater.dispatcher
-
-
-ccgame_handler = CommandHandler('cross-circles')
-message_handler = MessageHandler(filters=, catch_message)
+message_handler = MessageHandler(Filters.text, catch_message)
 
 dispatcher.add_handler(conv_handler)
-dispatcher.add_handler(ccgame_handler)
 dispatcher.add_handler(message_handler)
 
 updater.start_polling()
