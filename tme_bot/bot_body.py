@@ -189,7 +189,7 @@ def end(update, _):
     return ConversationHandler.END
 
 
-updater = Updater('5841761129:AAGWzrUYTccSd75_v837_qqiblVAsTQKm4w')
+updater = Updater()
 dispatcher = updater.dispatcher
 
 # Настройка обработчика разговоров с состояниями `FIRST` и `SECOND`
