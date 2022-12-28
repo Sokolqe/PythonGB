@@ -1,6 +1,7 @@
 from telegram.ext import Updater, CommandHandler, CallbackContext, \
     MessageHandler, CallbackQueryHandler, ConversationHandler, Filters
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from random import randint
 import logging
 
 
@@ -12,6 +13,7 @@ def catch_message(update: Update):
     else:
         update.message.reply_text(f'Перейдем сразу к делу...')
 
+
 # Ведение журнала логов
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -22,10 +24,28 @@ logger = logging.getLogger(__name__)
 # Этапы/состояния разговора
 FIRST, SECOND = range(2)
 # Данные обратного вызова
-ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE = range(9)
+ONE, TWO = range(2)
 
 
-def start(update, _):
+def keys(key_tuples):
+    return [
+        [
+            InlineKeyboardButton(key_tuples[0][0], callback_data=key_tuples[0][1]),
+            InlineKeyboardButton(key_tuples[1][0], callback_data=key_tuples[1][1]),
+            InlineKeyboardButton(key_tuples[2][0], callback_data=key_tuples[2][1]),
+        ], [
+            InlineKeyboardButton(key_tuples[3][0], callback_data=key_tuples[3][1]),
+            InlineKeyboardButton(key_tuples[4][0], callback_data=key_tuples[4][1]),
+            InlineKeyboardButton(key_tuples[5][0], callback_data=key_tuples[5][1]),
+        ], [
+            InlineKeyboardButton(key_tuples[6][0], callback_data=key_tuples[6][1]),
+            InlineKeyboardButton(key_tuples[7][0], callback_data=key_tuples[7][1]),
+            InlineKeyboardButton(key_tuples[8][0], callback_data=key_tuples[8][1]),
+        ]
+    ]
+
+
+def start(update, key_tuples):
     """Вызывается по команде `/start`."""
     # Получаем пользователя, который запустил команду `/start`
     user = update.message.from_user
@@ -34,31 +54,17 @@ def start(update, _):
     # отображаемый текст и строку `callback_data`
     # Клавиатура - это список строк кнопок, где каждая строка,
     # в свою очередь, является списком `[[...]]`
-    keyboard = [
-        [
-            InlineKeyboardButton("1", callback_data=str(ONE)),
-            InlineKeyboardButton("2", callback_data=str(TWO)),
-            InlineKeyboardButton("3", callback_data=str(THREE)),
-        ], [
-            InlineKeyboardButton("4", callback_data=str(FOUR)),
-            InlineKeyboardButton("5", callback_data=str(FIVE)),
-            InlineKeyboardButton("6", callback_data=str(SIX)),
-        ], [
-            InlineKeyboardButton("7", callback_data=str(SEVEN)),
-            InlineKeyboardButton("8", callback_data=str(EIGHT)),
-            InlineKeyboardButton("9", callback_data=str(NINE)),
-        ]
-    ]
+    keyboard = keys(key_tuples)
     reply_markup = InlineKeyboardMarkup(keyboard)
     # Отправляем сообщение с текстом и добавленной клавиатурой `reply_markup`
     update.message.reply_text(
-        text="Выберите клетку", reply_markup=reply_markup
+        text=f"{user.first_name}, сделайте Ваш ход", reply_markup=reply_markup
     )
     # Сообщаем `ConversationHandler`, что сейчас состояние `FIRST`
     return FIRST
 
 
-def start_over(update, _):
+def start_over(update, key_tuples):
     """Тот же текст и клавиатура, что и при `/start`, но не как новое сообщение"""
     # Получаем `CallbackQuery` из обновления `update`
     query = update.callback_query
@@ -66,118 +72,53 @@ def start_over(update, _):
     # даже если уведомление для пользователя не требуется.
     # В противном случае у некоторых клиентов могут возникнуть проблемы.
     query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("1", callback_data=str(ONE)),
-            InlineKeyboardButton("2", callback_data=str(TWO)),
-            InlineKeyboardButton("3", callback_data=str(THREE)),
-        ], [
-            InlineKeyboardButton("4", callback_data=str(FOUR)),
-            InlineKeyboardButton("5", callback_data=str(FIVE)),
-            InlineKeyboardButton("6", callback_data=str(SIX)),
-        ], [
-            InlineKeyboardButton("7", callback_data=str(SEVEN)),
-            InlineKeyboardButton("8", callback_data=str(EIGHT)),
-            InlineKeyboardButton("9", callback_data=str(NINE)),
-        ]
-    ]
+    keyboard = keys(key_tuples)
     reply_markup = InlineKeyboardMarkup(keyboard)
-   # Отредактируем сообщение, вызвавшее обратный вызов.
-   # Это создает ощущение интерактивного меню.
+    # Отредактируем сообщение, вызвавшее обратный вызов.
+    # Это создает ощущение интерактивного меню.
     query.edit_message_text(
-        text="Выберите клетку", reply_markup=reply_markup
+        text=f"{user.first_name}, сделайте Ваш ход", reply_markup=reply_markup
     )
     # Сообщаем `ConversationHandler`, что сейчас находимся в состоянии `FIRST`
     return FIRST
 
 
-def one(update, _):
+def turn(update, key_tuples):
     """Показ нового выбора кнопок"""
     query = update.callback_query
     choice_index = query.data
+    key_tuples[choice_index + 1][0], key_tuples[choice_index + 1][1] = "X", str(None)
     query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("X", callback_data=str(None)),
-            InlineKeyboardButton("2", callback_data=str(TWO)),
-            InlineKeyboardButton("3", callback_data=str(THREE)),
-        ], [
-            InlineKeyboardButton("4", callback_data=str(FOUR)),
-            InlineKeyboardButton("5", callback_data=str(FIVE)),
-            InlineKeyboardButton("6", callback_data=str(SIX)),
-        ], [
-            InlineKeyboardButton("7", callback_data=str(SEVEN)),
-            InlineKeyboardButton("8", callback_data=str(EIGHT)),
-            InlineKeyboardButton("9", callback_data=str(NINE)),
-        ]
-    ]
+    keyboard = keys(key_tuples)
     reply_markup = InlineKeyboardMarkup(keyboard)
+    # Отредактируем сообщение, вызвавшее обратный вызов.
+    # Это создает ощущение интерактивного меню.
     query.edit_message_text(
-        text="Выберите клетку", reply_markup=reply_markup
+        text=f"{user.first_name}, сделайте Ваш ход", reply_markup=reply_markup
     )
     return FIRST
 
 
-def two(update, _):
-    """Показ нового выбора кнопок"""
-    query = update.callback_query
-    print(query.data)
-    query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("1", callback_data=str(ONE)),
-            InlineKeyboardButton("X", callback_data=str(TWO)),
-            InlineKeyboardButton("3", callback_data=str(THREE)),
-        ], [
-            InlineKeyboardButton("4", callback_data=str(FOUR)),
-            InlineKeyboardButton("5", callback_data=str(FIVE)),
-            InlineKeyboardButton("6", callback_data=str(SIX)),
-        ], [
-            InlineKeyboardButton("7", callback_data=str(SEVEN)),
-            InlineKeyboardButton("8", callback_data=str(EIGHT)),
-            InlineKeyboardButton("9", callback_data=str(NINE)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="Второй CallbackQueryHandler", reply_markup=reply_markup
-    )
-    return FIRST
+def win_condition(key_tuples):
+    """
+    Checks win condition and returns info about success
 
+    :param key_tuples: list with field's cells
+    :param player: list with players number and name
+    :return:
+    """
 
-def three(update, _):
-    """Показ выбора кнопок"""
-    query = update.callback_query
-    query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("Да, сделаем это снова!", callback_data=str(ONE)),
-            InlineKeyboardButton("Нет, с меня хватит ...", callback_data=str(TWO)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="Третий CallbackQueryHandler. Начать сначала?", reply_markup=reply_markup
-    )
-    # Переход в состояние разговора `SECOND`
-    return SECOND
-
-
-def four(update, _):
-    """Показ выбора кнопок"""
-    query = update.callback_query
-    query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("2", callback_data=str(TWO)),
-            InlineKeyboardButton("4", callback_data=str(FOUR)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="Четвертый CallbackQueryHandler, выберите маршрут", reply_markup=reply_markup
-    )
-    return FIRST
+    if key_tuples[0][0] == key_tuples[1][0] == key_tuples[2][0] \
+            or key_tuples[3][0] == key_tuples[4][0] == key_tuples[5][0] \
+            or key_tuples[6][0] == key_tuples[7][0] == key_tuples[8][0] \
+            or key_tuples[0][0] == key_tuples[3][0] == key_tuples[6][0] \
+            or key_tuples[1][0] == key_tuples[4][0] == key_tuples[7][0] \
+            or key_tuples[2][0] == key_tuples[5][0] == key_tuples[8][0] \
+            or key_tuples[0][0] == key_tuples[4][0] == key_tuples[8][0] \
+            or key_tuples[2][0] == key_tuples[4][0] == key_tuples[6][0]:
+        return False
+    else:
+        return True
 
 
 def end(update, _):
@@ -187,6 +128,19 @@ def end(update, _):
     query.answer()
     query.edit_message_text(text="See you next time!")
     return ConversationHandler.END
+
+
+def turn_maker(update, key_tuples):
+    while win_condition(key_tuples):
+        turn(update, key_tuples=key_tuples)
+        query = update.callback_query
+        query.answer()
+        choice_bot = randint(0, 8)
+        while key_tuples[choice_bot + 1][0].isdigit():
+            choice_bot = randint(0, 8)
+        key_tuples[choice_bot + 1][0], key_tuples[choice_bot + 1][1] = "O", str(None)
+        query.edit_message_text(text=f"Я выбрал {choice_bot+1}")
+    return end(Update, None)
 
 
 updater = Updater()
@@ -200,17 +154,9 @@ dispatcher = updater.dispatcher
 # Таким образом, паттерн `^ABC$` будет ловить только 'ABC'
 conv_handler = ConversationHandler(
     entry_points=[CommandHandler('start', start)],
-    states={ # словарь состояний разговора, возвращаемых callback функциями
+    states={  # словарь состояний разговора, возвращаемых callback функциями
         FIRST: [
-            CallbackQueryHandler(one, pattern='^' + str(ONE) + '$'),
-            CallbackQueryHandler(two, pattern='^' + str(TWO) + '$'),
-            CallbackQueryHandler(three, pattern='^' + str(THREE) + '$'),
-            CallbackQueryHandler(four, pattern='^' + str(FOUR) + '$'),
-            CallbackQueryHandler(one, pattern='^' + str(FIVE) + '$'),
-            CallbackQueryHandler(two, pattern='^' + str(SIX) + '$'),
-            CallbackQueryHandler(three, pattern='^' + str(SEVEN) + '$'),
-            CallbackQueryHandler(four, pattern='^' + str(EIGHT) + '$'),
-            CallbackQueryHandler(four, pattern='^' + str(NINE) + '$'),
+            CallbackQueryHandler(turn_maker, pattern='^' + str(ONE) + '$'),
         ],
         SECOND: [
             CallbackQueryHandler(start_over, pattern='^' + str(ONE) + '$'),
@@ -218,7 +164,14 @@ conv_handler = ConversationHandler(
         ],
     },
     fallbacks=[CommandHandler('start', start)],
-    )
+)
+
+key_tuples = [
+    ("1", str(ONE)), ("2", str(ONE)), ("3", str(ONE)),
+    ("4", str(ONE)), ("5", str(ONE)), ("6", str(ONE)),
+    ("7", str(ONE)), ("8", str(ONE)), ("9", str(ONE)),
+]
+
 message_handler = MessageHandler(Filters.text, catch_message)
 
 dispatcher.add_handler(conv_handler)
