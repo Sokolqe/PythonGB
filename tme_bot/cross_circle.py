@@ -119,7 +119,7 @@ def game(call_bck):
 
 # возвращает клавиатуру для бота
 # на вход получает call_bck - данные с callBack-кнопки
-def getKeyboard(call_bck):
+def get_keys(call_bck):
     keyboard = [[], [], []]  # заготовка объекта клавиатуры, которая вернется
 
     if call_bck != None:  # если
@@ -132,14 +132,14 @@ def getKeyboard(call_bck):
     return keyboard
 
 
-def newGame(update, _):
+def new_game(update, _):
     # сформировать callBack данные для первой игры, то есть строку, состояющую из 9 неопределенных символов
     data = ''
     for i in range(0, 9):
         data += st.SYMBOL_UNDEF
 
     # отправить сообщение для начала игры
-    update.message.reply_text(st.ANSW_YOUR_TURN, reply_markup=InlineKeyboardMarkup(getKeyboard(data)))
+    update.message.reply_text(st.ANSW_YOUR_TURN, reply_markup=InlineKeyboardMarkup(get_keys(data)))
 
 
 def button(update, _):
@@ -149,7 +149,7 @@ def button(update, _):
     message, call_bck, alert = game(call_bck)  # игра
     if alert is None:  # если не получен сигнал тревоги (alert==None), то редактируем сообщение и меняем клавиатуру
         query.answer()  # обязательно нужно что-то отправить в ответ, иначе могут возникнуть проблемы с ботом
-        query.edit_message_text(text=message, reply_markup=InlineKeyboardMarkup(getKeyboard(call_bck)))
+        query.edit_message_text(text=message, reply_markup=InlineKeyboardMarkup(get_keys(call_bck)))
     else:  # если получен сигнал тревоги (alert!=None), то отобразить сообщение о тревоге
         query.answer(text=alert, show_alert=True)
 
@@ -159,16 +159,14 @@ def help_command(update, _):
 
 
 if __name__ == '__main__':
-    updater = Updater('5841761129:AAGWzrUYTccSd75_v837_qqiblVAsTQKm4w')  # получения токена из файла 'token.txt' и инициализация updater
+    updater = Updater()
 
-    # добавление обработчиков
-    updater.dispatcher.add_handler(CommandHandler('start', newGame))
-    updater.dispatcher.add_handler(CommandHandler('new_game', newGame))
+    updater.dispatcher.add_handler(CommandHandler('start', new_game))
+    updater.dispatcher.add_handler(CommandHandler('new_game', new_game))
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
     updater.dispatcher.add_handler(
         MessageHandler(Filters.text, help_command))  # обработчик на любое текстовое сообщение
     updater.dispatcher.add_handler(CallbackQueryHandler(button))  # добавление обработчика на CallBack кнопки
 
-    # Запуск бота
     updater.start_polling()
     updater.idle()
