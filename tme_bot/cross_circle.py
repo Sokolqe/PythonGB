@@ -152,7 +152,7 @@ if __name__ == '__main__':
     updater = Updater()
 
     updater.dispatcher.add_handler(CommandHandler('start', crs_crcl_strt))
-    updater.dispatcher.add_handler(CommandHandler('cross&circle', crs_crcl_strt))
+    updater.dispatcher.add_handler(CommandHandler('cross_and_circles', crs_crcl_strt))
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(MessageHandler(Filters.text, help_command))
